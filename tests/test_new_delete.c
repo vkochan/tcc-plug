@@ -3,7 +3,7 @@
 
 int main(void)
 {
-	tcc_plug_ctx_t *plug;
+	tcc_plug_t *plug;
 
 	plug = tcc_plug_new();
 	assert(plug);

@@ -1,4 +1,6 @@
+#include <errno.h>
 #include <string.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <libtcc.h>
 #include <inttypes.h>
@@ -126,29 +128,129 @@ static void list_add_tail(list_t *new, list_t *head)
 	     !list_entry_is_head(pos, head, member);			\
 	     pos = list_next_entry(pos, member))
 
-typedef struct tcc_plugin {
+#define list_for_each_entry_safe(pos, n, head, member)		\
+	for (pos = list_first_entry(head, typeof(*pos), member), \
+	     n = list_next_entry(pos, member); \
+	     &pos->member != (head); \
+	     pos = n, n = list_next_entry(n, member))
+
+typedef struct tcc_plug_path {
+	list_t list;
+	xstr_t str;
+} tcc_plug_path_t;
+
+typedef struct tcc_plug_symb {
+	list_t list;
 	xstr_t name;
-	list_t path;
-	uint8_t *code;
-} tcc_plugin_t;
+	void *ptr;
+} tcc_plug_symb_t;
 
 typedef struct tcc_plug {
-	list_t pathes;
+	list_t inc_pathes;
+	list_t lib_pathes;
+	list_t load_pathes;
+
+	list_t symbs;
 } tcc_plug_t;
 
 tcc_plug_t *tcc_plug_new(void)
 {
-	return calloc(sizeof(tcc_plug_t), 1);
+	tcc_plug_t *plug;
+
+	plug = calloc(sizeof(tcc_plug_t), 1);
+	if (!plug)
+		return NULL;
+
+	list_init(&plug->inc_pathes);
+	list_init(&plug->lib_pathes);
+	list_init(&plug->load_pathes);
+
+	list_init(&plug->symbs);
+
+	return plug;
 }
 
 void tcc_plug_delete(tcc_plug_t *plug)
 {
+	tcc_plug_path_t *path, *tmp_path;
+	tcc_plug_symb_t *symb, *tmp_symb;
+
+	list_for_each_entry_safe(path, tmp_path, &plug->inc_pathes, list) {
+		xstr_free(path->str);
+		free(path);
+	}
+	list_for_each_entry_safe(path, tmp_path, &plug->lib_pathes, list) {
+		xstr_free(path->str);
+		free(path);
+	}
+	list_for_each_entry_safe(path, tmp_path, &plug->load_pathes, list) {
+		xstr_free(path->str);
+		free(path);
+	}
+
+	list_for_each_entry_safe(symb, tmp_symb, &plug->symbs, list) {
+		xstr_free(symb->name);
+		free(symb);
+	}
+
 	free(plug);
 }
 
-int tcc_plug_add_path(tcc_plug_t *plug, const char *s)
+int tcc_plug_add_loadpath(tcc_plug_t *plug, char *s)
 {
-	return -1;
+	tcc_plug_path_t *path;
+
+	path = calloc(sizeof(*path), 1);
+	if (!path)
+		return -ENOMEM;
+
+	path->str = xstr(s);
+
+	list_add_tail(&path->list, &plug->load_pathes);
+	return 0;
+}
+
+int tcc_plug_add_incpath(tcc_plug_t *plug, char *s)
+{
+	tcc_plug_path_t *path;
+
+	path = calloc(sizeof(*path), 1);
+	if (!path)
+		return -ENOMEM;
+
+	path->str = xstr(s);
+
+	list_add_tail(&path->list, &plug->inc_pathes);
+	return 0;
+}
+
+int tcc_plug_add_libpath(tcc_plug_t *plug, char *s)
+{
+	tcc_plug_path_t *path;
+
+	path = calloc(sizeof(*path), 1);
+	if (!path)
+		return -ENOMEM;
+
+	path->str = xstr(s);
+
+	list_add_tail(&path->list, &plug->lib_pathes);
+	return 0;
+}
+
+int tcc_plug_add_symb(tcc_plug_t *plug, char *name, void *ptr)
+{
+	tcc_plug_symb_t *symb;
+
+	symb = calloc(sizeof(*symb), 1);
+	if (!symb)
+		return -ENOMEM;
+
+	symb->name = xstr(name);
+	symb->ptr = ptr;
+
+	list_add_tail(&symb->list, &plug->symbs);
+	return 0;
 }
 
 int tcc_plug_load(tcc_plug_t *plug)
