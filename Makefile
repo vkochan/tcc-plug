@@ -5,7 +5,7 @@ SRCS := main.c
 OBJS := $(SRCS:.c=.o)
 
 LDFLAGS = -ltcc -lrt -ldl -shared
-CC = tcc
+CC ?= tcc
 
 all: $(TARGET)
 
