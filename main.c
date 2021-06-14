@@ -138,11 +138,12 @@ typedef struct tcc_plug {
 
 tcc_plug_t *tcc_plug_new(void)
 {
-	return NULL;
+	return calloc(sizeof(tcc_plug_t), 1);
 }
 
 void tcc_plug_delete(tcc_plug_t *plug)
 {
+	free(plug);
 }
 
 int tcc_plug_add_path(tcc_plug_t *plug, const char *s)
