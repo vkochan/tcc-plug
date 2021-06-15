@@ -18,3 +18,7 @@ run_tests: $(TESTS)
 
 %.o: %.c
 	$(CC) $(TESTS_CFLAGS) -c $< -o $@
+
+.PHONY: clean
+clean:
+	rm -f *.o *.so $(TESTS)

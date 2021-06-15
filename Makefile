@@ -18,3 +18,8 @@ $(TARGET): $(OBJS)
 .PHONY: tests
 tests: $(TARGET)
 	$(MAKE) -C tests/
+
+.PHONY: clean
+clean:
+	$(MAKE) -C tests/ clean
+	rm -f *.o *.so
