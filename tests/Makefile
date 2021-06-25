@@ -3,7 +3,7 @@ TESTS_CFLAGS = -I$(CURDIR)/../
 TESTS_LIBS = -ltcc-plug
 CC ?= tcc
 
-TESTS := test_new_delete
+TESTS := test_new_delete test_load_unload
 
 all: run_tests
 .PHONY: run_tests
