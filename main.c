@@ -74,7 +74,7 @@ static xstr_t xstr_cat(xstr_t s1, xstr_t s2)
 		return s1;
 
 	ret.len = s1.len + s2.len;
-	ret.str = calloc(ret.len + 1, 1);
+	ret.str = calloc(ret.len + 1, sizeof(*ret.str));
 	ret.flags = XMEM_BIT_ALLOC;
 
 	strncpy(ret.str, s1.str, s1.len);
@@ -88,7 +88,7 @@ static xstr_t xstr_join(xstr_t s1, xstr_t js, xstr_t s2)
 	xstr_t ret;
 
 	ret.len = s1.len + js.len + s2.len;
-	ret.str = calloc(ret.len + 1, 1);
+	ret.str = calloc(ret.len + 1, sizeof(*ret.str));
 	ret.flags = XMEM_BIT_ALLOC;
 
 	strncpy(ret.str, s1.str, s1.len);
@@ -253,7 +253,7 @@ static xpath_t *xpath_new(xstr_t s)
 {
 	xpath_t *p;
 
-	p = calloc(sizeof(*p), 1);
+	p = calloc(1, sizeof(*p));
 	if (!p)
 		return NULL;
 
@@ -373,7 +373,7 @@ static tcc_plugin_t *tcc_plugin_get(tcc_plug_t *plug, xstr_t name)
 	if (!dir)
 		goto out;
 
-	p = calloc(sizeof(*p), 1);
+	p = calloc(1, sizeof(*p));
 	if (!p)
 		goto out;
 
@@ -455,7 +455,7 @@ static void tcc_plugin_get_symbs_cb(void *ctx, const char *name, const void *val
 	if (!xstr_has_prefix(xstr(name), prefix))
 		goto out;
 
-	symb = calloc(sizeof(*symb), 1);
+	symb = calloc(1, sizeof(*symb));
 	if (!symb)
 		goto out;
 
@@ -525,7 +525,7 @@ static int tcc_plugin_compile(tcc_plugin_t *p)
 		goto out;
 	}
 
-	p->code = calloc(1, len);
+	p->code = calloc(len, sizeof(*p->code));
 	if (!p->code) {
 		err = -ENOMEM;
 		goto out;
@@ -611,7 +611,7 @@ static int tcc_plugin_config_get(tcc_plugin_t *p)
 	while (!xstr_is_empty(tok)) {
 		tcc_plug_deps_t *dep;
 
-		dep = calloc(sizeof(*dep), 1);
+		dep = calloc(1, sizeof(*dep));
 		if (!dep) {
 			err = -ENOMEM;
 			goto out;
@@ -688,7 +688,7 @@ tcc_plug_t *tcc_plug_new(void)
 	if (xstr_is_empty(cwd))
 		return NULL;
 
-	plug = calloc(sizeof(tcc_plug_t), 1);
+	plug = calloc(1, sizeof(tcc_plug_t));
 	if (!plug)
 		return NULL;
 
@@ -740,7 +740,7 @@ int tcc_plug_add_incpath(tcc_plug_t *plug, char *s)
 {
 	xpath_t *path;
 
-	path = calloc(sizeof(*path), 1);
+	path = calloc(1, sizeof(*path));
 	if (!path)
 		return -ENOMEM;
 
@@ -754,7 +754,7 @@ int tcc_plug_add_libpath(tcc_plug_t *plug, char *s)
 {
 	xpath_t *path;
 
-	path = calloc(sizeof(*path), 1);
+	path = calloc(1, sizeof(*path));
 	if (!path)
 		return -ENOMEM;
 
@@ -768,7 +768,7 @@ int tcc_plug_add_symb(tcc_plug_t *plug, char *name, void *ptr)
 {
 	tcc_plug_symb_t *symb;
 
-	symb = calloc(sizeof(*symb), 1);
+	symb = calloc(1, sizeof(*symb));
 	if (!symb)
 		return -ENOMEM;
 
