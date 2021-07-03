@@ -2,6 +2,12 @@
 #include <assert.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
+
+void test_api_hello(void)
+{
+	printf("call: %s\n", __func__);
+};
 
 int main(void)
 {
@@ -14,6 +20,9 @@ int main(void)
 
 	plug = tcc_plug_new();
 	assert(plug);
+
+	err = tcc_plug_add_symb(plug, "test_api_hello", test_api_hello);
+	assert(!err);
 
 	err = tcc_plug_set_loadpath(plug, load_path);
 	assert(!err);

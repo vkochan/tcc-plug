@@ -494,6 +494,7 @@ static int tcc_plugin_compile(tcc_plugin_t *p)
 			goto out;
 	}
 
+	/* export symbols */
 	list_for_each_entry(dep, &p->deps, list) {
 		tcc_plugin_t *d = tcc_plugin_load(p->plug, dep->name);
 
@@ -508,6 +509,13 @@ static int tcc_plugin_compile(tcc_plugin_t *p)
 				tcc_plugin_put(p);
 				return -EINVAL;
 			}
+		}
+	}
+	list_for_each_entry(symb, &p->plug->symbs, list) {
+		err = tcc_add_symbol(s, xstr_cptr(symb->name), symb->ptr);
+		if (err) {
+			tcc_plugin_put(p);
+			return -EINVAL;
 		}
 	}
 
