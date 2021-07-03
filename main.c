@@ -499,14 +499,14 @@ static int tcc_plugin_compile(tcc_plugin_t *p)
 
 		if (!d) {
 			tcc_plugin_put(p);
-			return NULL;
+			return -EINVAL;
 		}
 
 		list_for_each_entry(symb, &d->exp_symbs, list) {
 			err = tcc_add_symbol(s, xstr_cptr(symb->name), symb->ptr);
 			if (err) {
 				tcc_plugin_put(p);
-				return NULL;
+				return -EINVAL;
 			}
 		}
 	}
